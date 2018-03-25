@@ -1,7 +1,7 @@
 '''
 Created on Mar 16, 2018
 
-@author: sps
+@author: sps,amp
 '''
 from __future__ import division
 import numpy as np
