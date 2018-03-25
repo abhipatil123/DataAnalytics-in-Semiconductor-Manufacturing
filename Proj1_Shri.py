@@ -33,8 +33,8 @@ f_n = 0
 x = np.array([float(i) for i in probe_tests[1][1:total_devices+1]])
 y = np.array([float(i) for i in probe_tests[2][1:total_devices+1]]) 
 
-print x
-print y
+#print x
+#print y
 indices = np.random.permutation(x.shape[0])
 training_idx, test_idx = indices[:250], indices[250:]
 Xtrain, Xtest = x[training_idx], x[test_idx]
@@ -70,6 +70,7 @@ for pb_idx in range(3,105):
     
     P1test = P1test.reshape(-1,1)
     
+    # Check number of test escapes and yield loss
     for id in range(len(test_idx)):
         passed = False
         
