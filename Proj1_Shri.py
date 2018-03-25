@@ -45,7 +45,7 @@ tx = np.append(Xtest,["","passed" ,"failed" ,"yield_Loss","test_escapes","length
 ty = np.append(Ytest,["","" ,"" ,"","","",""]).reshape(-1,1)
 csv_data = np.concatenate((tx,ty),axis = 1)
 
-for pb_idx in range(3,105):
+for pb_idx in range(3,4):
     probe_test1 = np.array([float(i) for i in probe_tests[pb_idx][1:total_devices+1]])
     P1train, P1test = probe_test1[training_idx], probe_test1[test_idx]
     train = np.array(map(lambda x,y,z : [x,y,z] ,Xtrain,Ytrain,P1train))
