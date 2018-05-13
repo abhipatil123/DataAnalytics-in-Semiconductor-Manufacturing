@@ -44,7 +44,7 @@ f_n = 0
 
 csv_data = []
 #For all Probetest measurements
-for pb_idx in range(3,4):   
+for pb_idx in range(103,104):   
     #Create a new folder
     newpath = r"C:\Users\Abhishek\Dropbox\II Sem\Special topics-data analytics\Project-1" 
     c = newpath.split("\\")
@@ -55,9 +55,9 @@ for pb_idx in range(3,4):
     os.chdir(newpath)
     f_n=0
     #Loop for each cluster for each measurement
-    for k in range(0,k_values[pb_idx-3]):
-        x = np.array(cluster_values_each_measurement[pb_idx-3][k][:,0]) # Get x coordinates from second cluster
-        y = np.array(cluster_values_each_measurement[pb_idx-3][k][:,1]) # Get y coordinates from second cluster
+    for k in range(0,k_values[pb_idx-103]):
+        x = np.array(cluster_values_each_measurement[pb_idx-103][k][:,0]) # Get x coordinates from second cluster
+        y = np.array(cluster_values_each_measurement[pb_idx-103][k][:,1]) # Get y coordinates from second cluster
         
         #coords = np.concatenate((x, y), axis=0)
         
@@ -75,7 +75,7 @@ for pb_idx in range(3,4):
         #tr = np.append(RTest,["","","","","","",""]).reshape(-1,1)
         csv_data = np.column_stack((tx,ty))
         #probe_test1 = np.array([float(i) for i in probe_tests[pb_idx][1:total_devices+1]])
-        probe_test1 = np.array([float(i) for i in np.array(cluster_values_each_measurement[pb_idx-3][k][:,2])])
+        probe_test1 = np.array([float(i) for i in np.array(cluster_values_each_measurement[pb_idx-103][k][:,2])])
         #probe_test1 = np.array(cluster_values[0][:,2])
         #Map all the x,y and probetest values interms of training and test data
         P1train, P1test = probe_test1[training_idx], probe_test1[test_idx]

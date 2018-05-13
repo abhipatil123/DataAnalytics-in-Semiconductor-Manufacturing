@@ -31,7 +31,7 @@ z = map(float , z)
 
 cluster_values_each_measurement = []
 k_values = []
-for pb_idx in range(3,4):
+for pb_idx in range(103,104):
     probe_test = np.array([float(i) for i in probe_tests[pb_idx][1:total_devices+1]])
     Input_coordinates = np.array(map(list, zip(x,y,probe_test)))   
     #Input_coordinates = preprocessing.normalize(Input_coordinates, norm='l2')

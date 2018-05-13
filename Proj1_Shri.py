@@ -60,7 +60,7 @@ for pb_idx in range(3,4):
     
     # Return prediction means for test data from trained model
     
-    predict = kriging.predict(test_data=test, l=l_opt, sigma=sigma_opt)
+    predict,var = kriging.predict(test_data=test, l=l_opt, sigma=sigma_opt)
     print l_opt,sigma_opt
     test_limit_min, test_limit_max = float(test_limits.loc[pb_idx-2,1]),float(test_limits.loc[pb_idx-2,2])
     

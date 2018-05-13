@@ -3,7 +3,6 @@ from scipy import spatial
 import matplotlib.pyplot as plt
 
 
-
 def sq_exponential(x, y, l):
     """
     Squared exponential covariance function.
@@ -25,7 +24,6 @@ def sq_exponential(x, y, l):
     d = spatial.distance_matrix(x, y)
     k = np.exp(-(d ** 2) / (2 * l * l))
     return k
-
 
 def exponential(x, y, l):
     """
@@ -110,6 +108,7 @@ def cross_validate(train, l_values, sigma_values, rmse_opt, k_folds, cov_funcs=F
     if cov_funcs:
         functions.append(exponential)
 
+
     for f in functions:
         for l in l_values:
             for sigma in sigma_values:
@@ -120,8 +119,8 @@ def cross_validate(train, l_values, sigma_values, rmse_opt, k_folds, cov_funcs=F
                     training = np.concatenate(folds)
 
                     krig = SimpleKriging(training_data=training)
-                    pred = krig.predict(test_data=testing[:, :2], l=l, sigma=sigma)
-                    rmse = (((pred - testing[:, -1:])**2)**.5).mean()
+                    pred = krig.predict(test_data=testing[:, :-1], l=l, sigma=sigma)
+                    rmse = (((pred - testing[:, -1:])**2)**.5).mean()   #formula wrong
 
                     if k == 0:
                         local_error = rmse
@@ -134,6 +133,7 @@ def cross_validate(train, l_values, sigma_values, rmse_opt, k_folds, cov_funcs=F
                         l_final = l
                         sigma_final = sigma
                         cov_func_final = f
+                        
 
                 if verbose:
                     print "l={}, sigma={}, rmse={}".format(l, sigma, local_error)
@@ -147,10 +147,11 @@ class SimpleKriging(object):
     the simple Kriging method (using an underlying Gaussian process).
     """
 
-    def __init__(self, training_data):
+    def __init__(self, training_data, return_std = False):
         self.training_data = training_data
         self.X = training_data[:, :-1]
         self.Y = training_data[:, -1:]
+        self.return_std = return_std
 
     def predict(self, test_data, l, sigma, indices=False, cov_function=sq_exponential):
         """
@@ -172,77 +173,31 @@ class SimpleKriging(object):
         -------
 
         """
-        K_xtest_xtest = cov_function(test_data, test_data, l)
-        
+
         K_xtest_x = cov_function(test_data, self.X, l)
-        
-        # Get cholesky decomposition (square root) of the
-        # covariance matrix
-        #L = np.linalg.cholesky(K_xtest_xtest + 0.001*np.eye(len(test_data)))
-        #f_prior = np.dot(L, np.random.normal(size=(len(test_data),3)))
-        #plt.plot(test_data, f_prior)
-            
-        #plt.show()
-        
+        K_xtest_xtest = cov_function(test_data, test_data, l)
         K = cov_function(self.X, self.X, l)
-        
+
         sigma_sq_I = sigma**2 * np.eye(len(self.X))
         inv = np.linalg.inv(K + sigma_sq_I)
 
         predictions = K_xtest_x.dot(inv).dot(self.Y)
-        variance = np.diag(K_xtest_xtest - K_xtest_x.dot(inv).dot(K_xtest_x.T))
-        
-        if indices:
-            return np.concatenate((test_data, predictions, variance), axis=1)
-        else:
-            return predictions,variance
-    
-    def simulate1(self, bbox, ncells, l, sigma, gamma=0.001, indices=False, cov_function=sq_exponential,
-                 show_visual=False, save_kml=None):
-        """
-
-        Parameters
-        ----------
-        bbox : Array-like
-            Bounding box of coordinates to create grid within. Must contain four values.
-        ncells : int
-            The number of cells to create along one dimension (if you want a 10x10 grid, pass 10 to this parameter)
-        l : int or float
-            Length-scale value
-        sigma : int or float
-            Noise parameter
-        gamma : int or float, optional
-            Value for numerical stabilization to add to Cholesky decomposition
-        indices : bool, optional
-            If True, returns results with coordinates.
-        cov_function : function, optional
-            Uses squared exponential by default. Pass a different covariance function here if desired.
-        show_visual : bool, optional
-            Displays visualized results if True
-        save_kml : str, optional
-            Saves KML file to specified filename (without extension) if this argument is passed.
-        """
-
-        grid = make_grid(bounding_box=bbox, ncell=ncells)
-
-        prediction = self.predict(test_data=grid, l=l, sigma=sigma, indices=True)
-
-        K = cov_function(grid, grid, l)
-        L = np.linalg.cholesky(K + gamma * np.eye(len(K)))
-        u = np.random.normal(size=len(L))
-
-        result = prediction[:, -1] + L.dot(u)
-
-        if show_visual:
-            y = grid[:, 0]
-            x = grid[:, 1]
-            plt.scatter(x, y, c=result)
-            plt.colorbar(ticks=[np.min(result), np.max(result)], label='Probe measurement value')
-            plt.show()
+        var = np.diag(K_xtest_xtest- K_xtest_x.dot(inv).dot(K_xtest_x.T))
+        var.setflags(write=1)
+        var_negative = var < 0
+        if np.any(var_negative):
+            var[var_negative] = 0.0
+        std =  ((var)**0.5).reshape(-1,1)
 
         if indices:
-            return np.concatenate((grid, result[:, None]), axis=1)
+            if self.return_std:
+                return np.concatenate((test_data, predictions), axis=1), std
+            else:
+                return np.concatenate((test_data, predictions), axis=1)
+            
         else:
-            return result
-    
-        
+            if self.return_std:
+                return predictions,std
+            else:
+                return predictions
+
