@@ -1,7 +1,7 @@
 '''
 Created on Mar 8, 2018
 
-@author: sps
+@author: amp
 '''
 
 from __future__ import division
