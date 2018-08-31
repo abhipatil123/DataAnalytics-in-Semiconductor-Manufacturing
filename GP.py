@@ -2,7 +2,7 @@
 
 Created on Mar 9, 2018
 
-@author: sps
+@author: amp
 
 '''
 from scipy import spatial
